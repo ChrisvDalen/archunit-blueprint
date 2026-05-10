@@ -1,5 +1,6 @@
 package com.github.chrisvdalen.archunitgen.scanner
 
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiClass
 import com.intellij.psi.PsiJavaFile
@@ -37,7 +38,7 @@ class OpenApiCodeDetector(private val project: Project) {
         )
     }
 
-    fun detect(): OpenApiScanResult {
+    fun detect(): OpenApiScanResult = ReadAction.compute<OpenApiScanResult, RuntimeException> {
         val scope = GlobalSearchScope.projectScope(project)
         val generatedPackages = mutableSetOf<String>()
         val sampleClasses = mutableListOf<String>()
@@ -50,7 +51,7 @@ class OpenApiCodeDetector(private val project: Project) {
             }
         }
 
-        return OpenApiScanResult(
+        OpenApiScanResult(
             detectedPackages = generatedPackages,
             sampleClasses = sampleClasses,
             hasGeneratedCode = generatedPackages.isNotEmpty(),

@@ -1,6 +1,7 @@
 package com.github.chrisvdalen.archunitgen.scanner
 
 import com.github.chrisvdalen.archunitgen.model.LayerDefinition
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.PsiJavaFile
 import com.intellij.psi.search.GlobalSearchScope
@@ -84,9 +85,9 @@ class PackageRelationshipAnalyzer(private val project: Project) {
             }
         }
 
-    private fun collectAllPackages(): Set<String> {
+    private fun collectAllPackages(): Set<String> = ReadAction.compute<Set<String>, RuntimeException> {
         val scope = GlobalSearchScope.projectScope(project)
-        return AllClassesSearch.search(scope, project)
+        AllClassesSearch.search(scope, project)
             .findAll()
             .mapNotNull { cls -> (cls.containingFile as? PsiJavaFile)?.packageName }
             .filter { it.isNotBlank() }

@@ -1,6 +1,7 @@
 package com.github.chrisvdalen.archunitgen.scanner
 
 import com.github.chrisvdalen.archunitgen.model.SpringStereotype
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.project.Project
 import com.intellij.psi.JavaPsiFacade
 import com.intellij.psi.PsiClass
@@ -18,7 +19,7 @@ import com.intellij.psi.search.searches.AnnotatedElementsSearch
  */
 class SpringComponentScanner(private val project: Project) {
 
-    fun scan(): SpringScanResult {
+    fun scan(): SpringScanResult = ReadAction.compute<SpringScanResult, RuntimeException> {
         val facade = JavaPsiFacade.getInstance(project)
         val scope = GlobalSearchScope.projectScope(project)
 
@@ -32,7 +33,7 @@ class SpringComponentScanner(private val project: Project) {
                 .mapNotNull { psiClass -> toScannedClass(psiClass, stereotype) }
         }
 
-        return SpringScanResult(byStereotype)
+        SpringScanResult(byStereotype)
     }
 
     private fun toScannedClass(psiClass: PsiClass, stereotype: SpringStereotype): ScannedClass? {
