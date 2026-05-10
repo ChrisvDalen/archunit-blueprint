@@ -1,0 +1,42 @@
+<idea-plugin>
+    <id>com.github.chrisvdalen.archunit-rule-generator</id>
+    <name>ArchUnit Rule Generator</name>
+    <vendor url="https://github.com/chrisvdalen/archunit-blueprint">chrisvdalen</vendor>
+    <description><![CDATA[
+        Analyzes Java/Spring Boot projects and automatically suggests and generates
+        ArchUnit architecture test rules.<br/><br/>
+        <b>Features:</b>
+        <ul>
+            <li>Detects Spring stereotypes (@Controller, @Service, @Repository, @Component)</li>
+            <li>Analyzes package dependency relationships across layers</li>
+            <li>Detects generated OpenAPI code and suggests isolation rules</li>
+            <li>Proposes layered-architecture rules using ArchUnit's DSL</li>
+            <li>Generates ready-to-run JUnit 5 / ArchUnit test classes</li>
+            <li>Configurable via <code>archunit-rule-generator.yml</code> in the project root</li>
+        </ul>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.java</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+                id="ArchUnit Rules"
+                anchor="right"
+                secondary="false"
+                factoryClass="com.github.chrisvdalen.archunitgen.ui.ArchUnitToolWindowFactory"/>
+
+        <projectService
+                serviceImplementation="com.github.chrisvdalen.archunitgen.service.AnalysisService"/>
+    </extensions>
+
+    <actions>
+        <action
+                id="ArchUnitGen.OpenToolWindow"
+                class="com.github.chrisvdalen.archunitgen.ui.GenerateArchUnitRulesAction"
+                text="Analyze Project for ArchUnit Rules"
+                description="Opens the ArchUnit Rule Generator tool window">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

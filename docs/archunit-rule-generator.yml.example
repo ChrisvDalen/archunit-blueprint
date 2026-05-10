@@ -1,0 +1,33 @@
+# ArchUnit Rule Generator – project configuration
+# Copy this file to the project root as: archunit-rule-generator.yml
+
+archunit-generator:
+
+  # Root package fed to @AnalyzeClasses. Required for code generation.
+  base-package: com.example.myapp
+
+  output:
+    # Sub-package appended to base-package for the generated test class.
+    package: architecture
+    # Simple class name of the generated file.
+    class-name: ArchitectureRulesTest
+
+  filter:
+    # DROP suggestions below this threshold.  Values: HIGH | MEDIUM | LOW
+    minimum-confidence: MEDIUM
+
+    # Packages excluded from all scanning (prefix match).
+    excluded-packages:
+      - com.example.myapp.generated
+      - com.example.myapp.test
+
+    # Rule IDs to permanently suppress (use the tool window to find IDs).
+    excluded-rule-ids:
+      - controller-only-services   # too strict for our monolith
+
+  # Layers the auto-detector did not find – complement the automatic detection.
+  custom-layers:
+    - name: EventHandler
+      package-pattern: com.example.myapp.events..
+    - name: Messaging
+      package-pattern: com.example.myapp.messaging..

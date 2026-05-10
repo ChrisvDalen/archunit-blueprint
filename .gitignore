@@ -1,0 +1,10 @@
+.gradle/
+build/
+.idea/
+*.iml
+.kotlin/
+local.properties
+PUBLISH_TOKEN
+
+# Gradle wrapper jar is committed intentionally
+!gradle/wrapper/gradle-wrapper.jar
