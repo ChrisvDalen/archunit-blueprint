@@ -23,7 +23,18 @@ jobs:
           cache: gradle
 
       - name: Test and build plugin
-        run: ./gradlew test buildPlugin --no-daemon
+        run: ./gradlew test buildPlugin --no-daemon --info --stacktrace
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: test-reports-${{ github.sha }}
+          path: |
+            build/reports/tests/
+            build/test-results/
+          if-no-files-found: ignore
+          retention-days: 14
 
       - name: Upload plugin artifact
         if: success()
