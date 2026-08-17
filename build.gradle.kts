@@ -23,6 +23,7 @@ dependencies {
     // Unit tests – no IntelliJ Platform required
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
     testImplementation("org.assertj:assertj-core:3.26.3")
+    testRuntimeOnly("junit:junit:4.13.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     intellijPlatform {
