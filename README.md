@@ -4,11 +4,10 @@
 
 **An IntelliJ IDEA plugin that analyses your Java / Spring Boot project and proposes ready-to-run ArchUnit architecture rules — no manual rule-writing required.**
 
-[![Build](https://img.shields.io/badge/build-passing-brightgreen?style=flat-square)](#building-locally)
-[![IntelliJ Platform](https://img.shields.io/badge/IntelliJ%20Platform-2024.3%2B-orange?style=flat-square&logo=intellij-idea)](https://plugins.jetbrains.com/docs/intellij/)
-[![Java](https://img.shields.io/badge/Java-21-blue?style=flat-square&logo=openjdk)](https://openjdk.org/projects/jdk/21/)
-[![ArchUnit](https://img.shields.io/badge/ArchUnit-1.3-purple?style=flat-square)](https://www.archunit.org/)
-[![License](https://img.shields.io/badge/license-Apache%202.0-lightgrey?style=flat-square)](LICENSE)
+[![Build](https://img.shields.io/github/actions/workflow/status/ChrisvDalen/archunit-blueprint/ci.yml?branch=main&style=flat-square)](https://github.com/ChrisvDalen/archunit-blueprint/actions/workflows/ci.yml)
+[![IntelliJ Platform](https://img.shields.io/badge/IntelliJ%20Platform-2026.2%2B-orange?style=flat-square&logo=intellij-idea)](https://plugins.jetbrains.com/docs/intellij/)
+[![Java](https://img.shields.io/badge/Java-25-blue?style=flat-square&logo=openjdk)](https://openjdk.org/projects/jdk/25/)
+[![ArchUnit](https://img.shields.io/badge/ArchUnit-1.5-purple?style=flat-square)](https://www.archunit.org/)
 
 </div>
 
@@ -28,7 +27,7 @@ Open the plugin, click **Analyse Project**. It inspects your package structure, 
 
 ### Option A — Install from disk (recommended for trying it out)
 
-1. **Prerequisites:** IntelliJ IDEA 2024.3 or newer, JDK 21.
+1. **Prerequisites:** IntelliJ IDEA 2026.2 or newer, JDK 25.
 
 2. **Build the plugin ZIP:**
 
@@ -36,9 +35,6 @@ Open the plugin, click **Analyse Project**. It inspects your package structure, 
    # Clone the repository
    git clone https://github.com/ChrisvDalen/archunit-blueprint.git
    cd archunit-blueprint
-
-   # Bootstrap the Gradle wrapper (first time only — requires Gradle installed globally)
-   gradle wrapper --gradle-version 8.11.1
 
    # Build the distributable ZIP
    ./gradlew buildPlugin
@@ -161,14 +157,14 @@ The _generated test file_ depends on ArchUnit. Add this to the project where the
 <dependency>
     <groupId>com.tngtech.archunit</groupId>
     <artifactId>archunit-junit5</artifactId>
-    <version>1.3.0</version>
+    <version>1.5.0</version>
     <scope>test</scope>
 </dependency>
 ```
 
 ```kotlin
 // Gradle (Kotlin DSL)
-testImplementation("com.tngtech.archunit:archunit-junit5:1.3.0")
+testImplementation("com.tngtech.archunit:archunit-junit5:1.5.0")
 ```
 
 ---
