@@ -28,7 +28,6 @@ dependencies {
 
     intellijPlatform {
         intellijIdea("2026.2.0.1")
-        instrumentationTools()
         pluginVerifier()
 
         // Java PSI support
