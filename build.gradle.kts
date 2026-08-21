@@ -2,8 +2,8 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
     id("java")
-    id("org.jetbrains.kotlin.jvm") version "2.0.21"
-    id("org.jetbrains.intellij.platform") version "2.3.0"
+    id("org.jetbrains.kotlin.jvm") version "2.4.10"
+    id("org.jetbrains.intellij.platform") version "2.18.1"
 }
 
 group = "com.github.chrisvdalen"
@@ -18,17 +18,16 @@ repositories {
 
 dependencies {
     // YAML config parsing (bundled into plugin)
-    implementation("org.yaml:snakeyaml:2.3")
+    implementation("org.yaml:snakeyaml:2.6")
 
     // Unit tests – no IntelliJ Platform required
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
-    testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("junit:junit:4.13.2")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     intellijPlatform {
-        intellijIdeaCommunity("2024.3.3")
-        instrumentationTools()
+        intellijIdea("2026.2.0.1")
         pluginVerifier()
 
         // Java PSI support
@@ -50,7 +49,7 @@ intellijPlatform {
         """.trimIndent()
 
         ideaVersion {
-            sinceBuild = "243"
+            sinceBuild = "262"
             untilBuild = provider { null }
         }
     }
@@ -58,10 +57,12 @@ intellijPlatform {
     publishing {
         token = providers.environmentVariable("PUBLISH_TOKEN")
     }
-}
 
-kotlin {
-    jvmToolchain(21)
+    pluginVerification {
+        ides {
+            current()
+        }
+    }
 }
 
 tasks {
