@@ -18,7 +18,7 @@ repositories {
 
 dependencies {
     // YAML config parsing (bundled into plugin)
-    implementation("org.yaml:snakeyaml:2.6")
+    implementation("org.yaml:snakeyaml:2.7")
 
     // Unit tests – no IntelliJ Platform required
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
