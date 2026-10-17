@@ -121,6 +121,24 @@ and appears in the project view immediately.
 
 Green? Commit the file. Any future violation becomes a test failure.
 
+**7. Hand the same rules to your AI coding agent (optional)**
+
+Click **Generate Agent Guardrails**. The accepted rules become guardrails for coding agents, from the same source as the test:
+
+| File | What it does |
+|---|---|
+| `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md` | An *Architecture rules* section listing every accepted rule with its rationale and ArchUnit code, so the agent knows the rules **before** it writes code |
+| `.claude/hooks/archunit-check.sh` | Runs `ArchitectureRulesTest` (Gradle or Maven wrapper) when Java sources changed; on a violation it exits with code 2 and sends the violations back to the agent |
+| `.claude/settings.json` | Registers that script as a Claude Code `Stop` hook, so the agent cannot finish while the rules fail |
+
+Existing files are safe: the instruction files only get a section between
+`<!-- archunit-rule-generator:begin -->` and `<!-- archunit-rule-generator:end -->` markers, which is replaced
+on re-generation while your own text around it is kept. An existing `.claude/settings.json` is never touched;
+the plugin shows the hook snippet to merge by hand instead.
+
+Prose instructions alone are advisory, and agents do not reliably follow them. The hook makes the rules
+binding, and CI still runs the same test as the final gate.
+
 ---
 
 ## Configuration (optional)
@@ -241,14 +259,15 @@ src/main/kotlin/com/github/chrisvdalen/archunitgen/
 ├── model/          RuleSuggestion · RuleCategory · Confidence · SpringStereotype · LayerDefinition
 ├── scanner/        PSI-based Spring scanner · package-layer detector · OpenAPI detector
 ├── engine/         RuleSuggestionEngine  (pure Kotlin, no IntelliJ dependency)
-├── generator/      ArchUnitTestGenerator · TestFileWriter
+├── generator/      ArchUnitTestGenerator · TestFileWriter · AgentGuardrailsGenerator · GuardrailFileWriter
 ├── config/         PluginConfig · ConfigLoader  (SnakeYAML)
 ├── service/        AnalysisService  (IntelliJ project service, background task)
 └── ui/             ArchUnitToolWindowFactory · RuleSuggestionPanel · GenerateArchUnitRulesAction
 
 src/test/kotlin/com/github/chrisvdalen/archunitgen/
 ├── engine/         RuleSuggestionEngineTest     (8 test cases)
-├── generator/      ArchUnitTestGeneratorTest    (8 test cases)
+├── generator/      ArchUnitTestGeneratorTest    (9 test cases)
+│                   AgentGuardrailsGeneratorTest (9 test cases)
 └── config/         ConfigLoaderTest             (8 test cases)
 
 docs/
@@ -260,6 +279,8 @@ docs/
 
 ## Roadmap
 
+- [x] Agent guardrails: rules as AGENTS.md / CLAUDE.md / Copilot instructions plus a Claude Code Stop hook
+- [ ] Guardrail hooks for other agents (Copilot, Cursor) once they offer an equivalent blocking hook
 - [ ] Persist accept/ignore decisions between IDE sessions
 - [ ] Hexagonal / ports-and-adapters architecture rule template
 - [ ] Preview pane — see generated code before writing it
