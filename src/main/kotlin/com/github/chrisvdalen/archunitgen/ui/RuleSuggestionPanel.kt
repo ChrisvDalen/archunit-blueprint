@@ -1,7 +1,10 @@
 package com.github.chrisvdalen.archunitgen.ui
 
 import com.github.chrisvdalen.archunitgen.config.ConfigLoader
+import com.github.chrisvdalen.archunitgen.generator.AgentGuardrailsGenerator
 import com.github.chrisvdalen.archunitgen.generator.ArchUnitTestGenerator
+import com.github.chrisvdalen.archunitgen.generator.GeneratedTestFile
+import com.github.chrisvdalen.archunitgen.generator.GuardrailFileWriter
 import com.github.chrisvdalen.archunitgen.generator.TestFileWriter
 import com.github.chrisvdalen.archunitgen.generator.WriteResult
 import com.github.chrisvdalen.archunitgen.model.RuleStatus
@@ -28,7 +31,8 @@ import javax.swing.table.DefaultTableCellRenderer
  *  │  Rule | Category | Confidence | Status             │  ← JBTable
  *  │  ...                                               │
  *  ├────────────────────────────────────────────────────┤
- *  │  [Accept All] [Accept Selected] [Ignore] [Generate]│  ← action bar
+ *  │  [Accept All] [Accept Selected] [Ignore]           │
+ *  │  [Generate Test Class] [Generate Agent Guardrails] │  ← action bar
  *  └────────────────────────────────────────────────────┘
  */
 class RuleSuggestionPanel(private val project: Project) : JPanel(BorderLayout()) {
@@ -100,11 +104,17 @@ class RuleSuggestionPanel(private val project: Project) : JPanel(BorderLayout())
         val generate = JButton("Generate Test Class", AllIcons.Actions.Execute)
         generate.addActionListener { generateTestClass() }
 
+        val guardrails = JButton("Generate Agent Guardrails", AllIcons.Actions.Lightning)
+        guardrails.toolTipText = "Write the accepted rules to AGENTS.md, CLAUDE.md and Copilot instructions, " +
+            "and add a Claude Code hook that runs the ArchUnit test before the agent finishes."
+        guardrails.addActionListener { generateAgentGuardrails() }
+
         bar.add(acceptAll)
         bar.add(acceptSel)
         bar.add(ignoreSel)
         bar.add(JSeparator(SwingConstants.VERTICAL).also { it.preferredSize = java.awt.Dimension(2, 24) })
         bar.add(generate)
+        bar.add(guardrails)
         return bar
     }
 
@@ -133,15 +143,16 @@ class RuleSuggestionPanel(private val project: Project) : JPanel(BorderLayout())
         }
     }
 
-    private fun generateTestClass() {
+    /** Renders the test class for the accepted rules, asking for the base package if needed; null if cancelled. */
+    private fun renderTestClass(what: String): GeneratedTestFile? {
         val accepted = tableModel.allSuggestions().filter { it.status == RuleStatus.ACCEPTED }
         if (accepted.isEmpty()) {
             Messages.showInfoMessage(
                 project,
-                "Accept at least one rule before generating a test class.",
+                "Accept at least one rule before generating $what.",
                 "No Rules Accepted",
             )
-            return
+            return null
         }
 
         val config = ConfigLoader(project).load()
@@ -151,10 +162,14 @@ class RuleSuggestionPanel(private val project: Project) : JPanel(BorderLayout())
                 "Enter the root package of your application (e.g. com.example.myapp):",
                 "Base Package",
                 Messages.getQuestionIcon(),
-            ) ?: return
+            ) ?: return null
         }
 
-        val generated = ArchUnitTestGenerator().generate(accepted, config, basePackage)
+        return ArchUnitTestGenerator().generate(accepted, config, basePackage)
+    }
+
+    private fun generateTestClass() {
+        val generated = renderTestClass("a test class") ?: return
         val writer = TestFileWriter(project)
 
         when (val result = writer.write(generated)) {
@@ -179,6 +194,33 @@ class RuleSuggestionPanel(private val project: Project) : JPanel(BorderLayout())
 
             is WriteResult.Failure -> showError(result.reason)
         }
+    }
+
+    private fun generateAgentGuardrails() {
+        val testFile = renderTestClass("agent guardrails") ?: return
+        val files = AgentGuardrailsGenerator().generate(tableModel.allSuggestions(), testFile)
+        val results = GuardrailFileWriter(project).writeAll(files)
+
+        val written = results.filterIsInstance<WriteResult.Success>().map { it.path }
+        val skipped = results.filterIsInstance<WriteResult.AlreadyExists>().map { it.path }
+        val failed = results.filterIsInstance<WriteResult.Failure>().map { it.reason }
+
+        val message = buildString {
+            if (written.isNotEmpty()) appendLine("Written:\n${written.joinToString("\n")}")
+            if (skipped.isNotEmpty()) {
+                appendLine()
+                appendLine("${skipped.joinToString()} already exists and was left unchanged. Add this Stop hook to it by hand:")
+                appendLine(AgentGuardrailsGenerator.CLAUDE_SETTINGS)
+            }
+            val basePath = project.basePath
+            if (basePath != null && !java.io.File(basePath, testFile.relativePath).exists()) {
+                appendLine()
+                append("The hook and instructions run ${testFile.className}; click 'Generate Test Class' to create it.")
+            }
+        }
+
+        if (failed.isNotEmpty()) showError((failed + message).joinToString("\n"))
+        else Messages.showInfoMessage(project, message.trim(), "Agent Guardrails Created")
     }
 
     private fun showError(msg: String) =

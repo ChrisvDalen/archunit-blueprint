@@ -75,6 +75,22 @@ class ArchUnitTestGeneratorTest {
         assertThat(importValues).isSortedAccordingTo(compareBy { it })
     }
 
+    @Test
+    fun `ArchUnit DSL methods are imported statically, types normally`() {
+        val rule = acceptedRule(
+            imports = setOf(
+                "com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses",
+                "org.springframework.stereotype.Service",
+            ),
+        )
+
+        val result = generator.generate(listOf(rule), PluginConfig(), "com.example")
+
+        assertThat(result.code).contains("import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;")
+        assertThat(result.code).contains("import org.springframework.stereotype.Service;")
+        assertThat(result.code).doesNotContain("import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;")
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun acceptedRule(
