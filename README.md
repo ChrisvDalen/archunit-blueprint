@@ -40,7 +40,7 @@ Open the plugin, click **Analyse Project**. It inspects your package structure, 
    ./gradlew buildPlugin
    ```
 
-   The ZIP is produced at `build/distributions/archunit-rule-generator-0.1.0-SNAPSHOT.zip`.
+   The ZIP is produced at `build/distributions/archunit-rule-generator-0.1.0.zip`.
 
 3. **Install in IntelliJ IDEA:**
    - Open **Settings / Preferences → Plugins**
